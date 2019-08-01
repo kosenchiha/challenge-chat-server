@@ -5,7 +5,40 @@ const cors = require("cors");
 app.use(cors());
 app.use(bodyParser.json());
 
-const messages = [];
+const messages = [
+  {
+    id: 1,
+    from: "vicky",
+    text: "hi",
+    timeSent: "8/1/2019, 10:53:59 AM"
+  },
+  {
+    id: 2,
+    from: "paul ",
+    text: "hi vicky",
+    timeSent: "8/1/2019, 10:54:23 AM"
+  },
+
+  {
+    id: 3,
+    from: "vicky",
+    text: "how are u?",
+    timeSent: "8/1/2019, 10:54:39 AM"
+  },
+
+  {
+    id: 4,
+    from: "paul",
+    text: "good, thanks. What about u?",
+    timeSent: "8/1/2019, 10:55:06 AM"
+  },
+  {
+    id: 5,
+    from: "vicky",
+    text: "thanks, i'm fine.",
+    timeSent: "8/1/2019, 10:55:23 AM"
+  }
+];
 
 app.post("/messages", (req, res) => {
   const message = {
@@ -28,25 +61,25 @@ app.post("/messages", (req, res) => {
 });
 
 app.get("/messages", (req, res) => {
-  if (req.query.text) {
-    const messagesContainText = messages.filter(mes =>
-      mes.text.includes(req.query.text)
-    );
-    res.send(messagesContainText);
-  } else {
-    res.send(messages);
-  }
+  res.send(messages.reverse());
 });
 
 app.get("/messages/search", (req, res) => {
-  const messagesContainText = messages.filter(mes =>
-    mes.text.includes(req.query.text)
-  );
-  res.send(messagesContainText);
+  var searchKeys = Object.keys(req.query);
+  var filteredMessages = messages.slice();
+
+  searchKeys.forEach(keyName => {
+    if (req.query[keyName].length > 0) {
+      filteredMessages = filteredMessages.filter(mes =>
+        mes[keyName].toLowerCase().includes(req.query[keyName].toLowerCase())
+      );
+    }
+  });
+  res.send(filteredMessages);
 });
 
 app.get("/messages/latest", (req, res) => {
-  const topTenMessages = messages.slice(0, 10);
+  const topTenMessages = messages.slice(0, 10).reverse();
   res.send(topTenMessages);
 });
 
@@ -70,7 +103,6 @@ app.put("/messages/:id", (req, res) => {
   } else if (!req.body.from || req.body.from.length < 3) {
     res.status(400).send("Name is required and should be minimum 3 characters");
   } else if (!req.body.text) {
-    console.log(res);
     return res.status(400).send("Please, write a message");
   } else {
     message.from = req.body.from;
