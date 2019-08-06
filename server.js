@@ -14,35 +14,37 @@ const messages = [
   },
   {
     id: 2,
-    from: "paul ",
-    text: "hi vicky",
+    from: "Paul ",
+    text: "Hi, Vicky!",
     timeSent: "8/1/2019, 10:54:23 AM"
   },
 
   {
     id: 3,
-    from: "vicky",
-    text: "how are u?",
+    from: "Vicky",
+    text: "How are u?",
     timeSent: "8/1/2019, 10:54:39 AM"
   },
 
   {
     id: 4,
-    from: "paul",
-    text: "good, thanks. What about u?",
+    from: "Paul",
+    text: "Good, thanks. What about u?",
     timeSent: "8/1/2019, 10:55:06 AM"
   },
   {
     id: 5,
-    from: "vicky",
-    text: "thanks, i'm fine.",
+    from: "Vicky",
+    text: "Thanks, I'm fine.",
     timeSent: "8/1/2019, 10:55:23 AM"
   }
 ];
 
 app.post("/messages", (req, res) => {
+  const arrofIds = messages.slice().map(message => message.id);
+  const maxId = Math.max(...arrofIds);
   const message = {
-    id: messages.length + 1,
+    id: maxId + 1,
     from: req.body.from,
     text: req.body.text,
     timeSent: new Date().toLocaleString()
@@ -56,12 +58,14 @@ app.post("/messages", (req, res) => {
     return res.status(400).send({ error: "Please, write a message" });
   } else {
     messages.push(message);
+    console.log(message.id);
     res.send(message);
   }
 });
 
 app.get("/messages", (req, res) => {
-  res.send(messages.reverse());
+  const messagesToDisplay = messages.slice().reverse();
+  res.send(messagesToDisplay);
 });
 
 app.get("/messages/search", (req, res) => {
@@ -101,9 +105,11 @@ app.put("/messages/:id", (req, res) => {
       .status(404)
       .send("Sorry! Message with the given ID was not found");
   } else if (!req.body.from || req.body.from.length < 3) {
-    res.status(400).send("Name is required and should be minimum 3 characters");
+    res
+      .status(400)
+      .send({ error: "Name is required and should be minimum 3 characters" });
   } else if (!req.body.text) {
-    return res.status(400).send("Please, write a message");
+    return res.status(400).send({ error: "Please, write a message" });
   } else {
     message.from = req.body.from;
     message.text = req.body.text;
